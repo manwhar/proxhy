@@ -23,8 +23,7 @@ class BoundariesPlugin:
         self.team_spawnpoints: dict[str, tuple[float, float, float]] = {}
 
     def game_recently_started(self, window: float = 2.0):
-        # if we got teleported and the game started less than `w` seconds ago
-        # then we assume that was the tp from the start of the game
+        # game started less than `window` seconds ago
         return time.time() - self.last_game_start < window
 
     @listen_server(0x18)  # on entity teleport
@@ -42,6 +41,7 @@ class BoundariesPlugin:
 
         # if entity exists and is not an npc
         if uuid_version(entity_uuid) != 2:
+            # divide by 32 because of stupid chud datatype fixed point number
             x = buff.unpack(Int) / 32.0
             y = buff.unpack(Int) / 32.0
             z = buff.unpack(Int) / 32.0
