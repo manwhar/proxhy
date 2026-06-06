@@ -2,6 +2,7 @@ import logging
 
 from petty.endpoints import Proxy
 from plugins.autoboop import AutoboopPlugin
+from plugins.boundaries import BoundariesPlugin
 from plugins.broadcaster import BroadcastPlugin
 from plugins.chat import ChatPlugin
 from plugins.commands import CommandsPlugin
@@ -20,6 +21,7 @@ from plugins.window import WindowPlugin
 
 class ProxhyPlugin(  # type: ignore
     AutoboopPlugin,
+    BoundariesPlugin,
     BroadcastPlugin,
     ChatPlugin,
     CommandsPlugin,
