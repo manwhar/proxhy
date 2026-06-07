@@ -22,7 +22,7 @@ class BoundariesPlugin:
         self.entities_teleported: dict[str, tuple[float, float, float]] = {}
         self.team_spawnpoints: dict[str, tuple[float, float, float]] = {}
 
-    def game_recently_started(self, window: float = 2.0):
+    def game_recently_started(self, window: float = 2.0) -> bool:
         # game started less than `window` seconds ago
         return time.time() - self.last_game_start < window
 
@@ -30,7 +30,7 @@ class BoundariesPlugin:
     async def save_player_spawnpoints(self, buff: Buffer):
         self.downstream.send_packet(0x18, buff.getvalue())
 
-        if not self.game_recently_started():
+        if not (self.game_recently_started() or self.game.mode.startswith("bedwars")):
             return
 
         entity_id = buff.unpack(VarInt)
@@ -76,7 +76,7 @@ class BoundariesPlugin:
     async def read_spawnpoint(self, buff: Buffer):
         self.downstream.send_packet(0x08, buff.getvalue())
 
-        if self.game_recently_started():
+        if self.game_recently_started() and self.game.mode.startswith("bedwars"):
             x = buff.unpack(Double)
             y = buff.unpack(Double)
             z = buff.unpack(Double)
