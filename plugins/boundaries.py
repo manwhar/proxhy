@@ -4,12 +4,22 @@ regions around bases and diamond/emerald generators.
 """
 
 from petty.events import listen_server, subscribe
-from petty.protocol.datatypes import Buffer, Double, VarInt, Int
+from petty.protocol.datatypes import (
+    Angle,
+    Buffer,
+    Double,
+    VarInt,
+    Int,
+    Short,
+    UnsignedByte,
+    Float,
+)
 
 from proxhy.utils import uuid_version
 from gamestate.models import Entity, Player
 from gamestate.state import GameState
 from plugins.statcheck import GamePlayer
+from plugins.commands import command
 
 import time
 import asyncio
@@ -94,3 +104,58 @@ class BoundariesPlugin:
 
         self.last_game_start = time.time()
         self.downstream.send_packet(0x02, buff.getvalue())
+
+    @command("armorstand")
+    async def armor_stand_test(self):
+        # armor stand internal id: 1E; network ID: 4E
+        pos = self.gamestate.position
+        x, y, z = pos.x, pos.y, pos.z  # own coordinates
+
+        x_adjust = int(x * 32)  # "fixed-point number"
+        y_adjust = int(y * 32)
+        z_adjust = int(z * 32)
+
+        rot_x = 0.0
+        rot_y = 0.0
+        rot_z = 0.0
+
+        # spawn mob packet
+        self.downstream.send_packet(
+            0x0F,
+            VarInt.pack(999),  # Entity ID
+            UnsignedByte.pack(78),  # Type: Armor Stand
+            Int.pack(x_adjust),
+            Int.pack(y_adjust),
+            Int.pack(z_adjust),
+            Angle.pack(0),  # Yaw
+            Angle.pack(0),  # Pitch
+            Angle.pack(0),  # Head Pitch
+            Short.pack(0),  # Velocity X
+            Short.pack(0),  # Velocity Y
+            Short.pack(0),  # Velocity Z
+            # -- METADATA INJECTION --
+            # Index 0: Invisible
+            UnsignedByte.pack(0x00),  # Header: Type 0, Index 0
+            UnsignedByte.pack(0x20),  # Value: 0x20 bitmask
+            # Index 10: Marker & NoGravity
+            UnsignedByte.pack(0x0A),  # Header: Type 0, Index 10
+            UnsignedByte.pack(0x12),  # Value: 0x10 (Marker) | 0x02 (NoGravity)
+            # Index 11: Head Pose (Vector3f)
+            UnsignedByte.pack(0xEB),  # Header: Type 7, Index 11
+            Float.pack(rot_x),  # Pitch (X)
+            Float.pack(rot_y),  # Yaw (Y)
+            Float.pack(rot_z),  # Roll (Z)
+            UnsignedByte.pack(0x7F),  # Metadata Terminator
+        )
+
+        # entity equipment packet
+        self.downstream.send_packet(
+            0x04,
+            VarInt.pack(999),  # Entity ID (must match the spawn packet)
+            Short.pack(4),  # Slot: 4 (Helmet)
+            # -- SLOT DATA --
+            Short.pack(97),  # Item ID: Monster Egg
+            UnsignedByte.pack(1),  # Item Count: 1
+            Short.pack(1),  # Item Damage/Metadata: 1 (Cobblestone)
+            UnsignedByte.pack(0),  # NBT Terminator (Empty NBT compound)
+        )
