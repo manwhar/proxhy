@@ -1,13 +1,13 @@
 {
     "textures": {
-        "0": "blocks/corner",
-        "particle": "blocks/corner"
+        "0": "blocks/edge",
+        "particle": "blocks/edge"
     },
     "display": {
         "head": {
             "rotation": [0, 0, 0],
             "translation": [0, 0, 0],
-            "scale": [1, 1, 1]
+            "scale": [1.6, 1.6, 1.6]
         }
     },
     "elements": [
