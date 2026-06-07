@@ -1,0 +1,23 @@
+{
+    "textures": {
+        "0": "blocks/edge",
+        "particle": "blocks/edge"
+    },
+    "display": {
+        "head": {
+            "rotation": [0, 0, 0],
+            "translation": [0, 0, 0],
+            "scale": [1, 1, 1]
+        }
+    },
+    "elements": [
+        {
+            "from": [0, 1, 0],
+            "to": [16, 1.01, 16],
+            "faces": {
+                "up": {"uv": [8, 8, 0, 0], "texture": "#0"},
+                "down": {"uv": [8, 8, 0, 16], "texture": "#0"}
+            }
+        }
+    ]
+}
